@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Github, Linkedin, Mail } from 'lucide-react';
+import { Menu, X, Github, Linkedin, Mail, FileText } from 'lucide-react';
+import resumePDF from '../assets/Vishal_S_Resume-5.pdf';
 
 const Navbar = ({ themeToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,11 +58,14 @@ const Navbar = ({ themeToggle }) => {
           <div className="flex items-center space-x-4 border-l border-primary/10 pl-8">
             {themeToggle}
             <motion.a
-              href="/resume.pdf"
-              className="px-5 py-2 border border-accent/30 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
+              href={resumePDF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-2 border border-accent/30 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-accent hover:text-black transition-all flex items-center gap-2"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
+              <FileText size={14} />
               Resume
             </motion.a>
           </div>
@@ -96,10 +100,21 @@ const Navbar = ({ themeToggle }) => {
                   {link.name}
                 </a>
               ))}
-              <div className="pt-4 flex space-x-4">
-                <Github size={20} className="text-secondary/60 hover:text-accent" />
-                <Linkedin size={20} className="text-secondary/60 hover:text-accent" />
-                <Mail size={20} className="text-secondary/60 hover:text-accent" />
+              <div className="pt-4 flex flex-col space-y-4">
+                <div className="flex space-x-4">
+                  <a href="https://github.com/vishal23000591" target="_blank" rel="noopener noreferrer"><Github size={20} className="text-secondary/60 hover:text-accent" /></a>
+                  <a href="https://linkedin.com/in/vishal-s-bab6a6301/" target="_blank" rel="noopener noreferrer"><Linkedin size={20} className="text-secondary/60 hover:text-accent" /></a>
+                  <a href="mailto:vishalsuresh1975@gmail.com"><Mail size={20} className="text-secondary/60 hover:text-accent" /></a>
+                </div>
+                <a 
+                  href={resumePDF} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-full py-3 bg-accent/10 border border-accent/30 rounded-xl text-center text-sm font-bold uppercase tracking-widest text-accent flex items-center justify-center gap-2"
+                >
+                  <FileText size={16} />
+                  Download Resume
+                </a>
               </div>
             </div>
           </motion.div>
