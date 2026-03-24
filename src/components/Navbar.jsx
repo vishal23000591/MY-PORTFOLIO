@@ -4,8 +4,8 @@ import { Menu, X, Github, Linkedin, Mail, FileText } from 'lucide-react';
 import resumePDF from '../assets/Vishal_S_Resume-5.pdf';
 
 const Navbar = ({ themeToggle }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
