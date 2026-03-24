@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Lenis from 'lenis'
 import { AnimatePresence, motion } from 'framer-motion'
-import CustomCursor from './components/CustomCursor'
+import TargetCursor from './components/TargetCursor'
 import LoadingScreen from './components/LoadingScreen'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -14,6 +14,7 @@ import MainContent from './components/MainContent'
 import ProjectDetails from './components/ProjectDetails'
 import ThemeToggle from './components/ThemeToggle'
 import AiAssistant from './components/AiAssistant'
+import CommandPalette from './components/CommandPalette'
 
 // Scroll reset component for route changes
 const ScrollToTop = () => {
@@ -76,7 +77,12 @@ function App() {
     <Router>
       <ScrollToTop />
       <main className="min-h-screen bg-background text-primary selection:bg-accent selection:text-black font-sans relative transition-colors duration-700">
-        <CustomCursor />
+        <TargetCursor 
+          spinDuration={2}
+          hideDefaultCursor
+          parallaxOn
+          hoverDuration={0.2}
+        />
         
         <AnimatePresence mode="wait">
           {isLoading && (
@@ -106,6 +112,7 @@ function App() {
 
             <Footer />
             <AiAssistant />
+            <CommandPalette theme={theme} toggleTheme={toggleTheme} />
           </motion.div>
         )}
       </main>
