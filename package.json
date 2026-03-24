@@ -24,7 +24,12 @@
     "react-github-calendar": "^5.0.5",
     "react-router-dom": "^7.13.1",
     "tailwind-merge": "^2.2.1",
-    "three": "^0.162.0"
+    "three": "^0.162.0",
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "nodemailer": "^8.0.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",
