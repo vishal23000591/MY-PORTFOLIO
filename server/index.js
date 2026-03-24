@@ -19,48 +19,70 @@ const access_token_permanent = process.env.SPOTIFY_ACCESS_TOKEN; // Temporary to
 const basic = Buffer.from(`${client_id}:${client_secret}`).toString('base64');
 const TOKEN_ENDPOINT = `https://accounts.spotify.com/api/token`;
 
+let cachedToken = null;
+let tokenExpiry = 0;
+
 const getAccessToken = async () => {
     if (access_token_permanent && !refresh_token) {
         return { access_token: access_token_permanent };
     }
+    
+    if (cachedToken && Date.now() < tokenExpiry) {
+        return { access_token: cachedToken };
+    }
 
-    const response = await axios.post(TOKEN_ENDPOINT, new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token,
-    }), {
-        headers: {
-            Authorization: `Basic ${basic}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-    });
-
-    return response.data;
+    try {
+        const response = await axios.post(TOKEN_ENDPOINT, new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token,
+        }), {
+            headers: {
+                Authorization: `Basic ${basic}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+        
+        cachedToken = response.data.access_token;
+        tokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000;
+        return response.data;
+    } catch (e) {
+        console.error("Token Fetch Error:", e.message);
+        throw e;
+    }
 };
+
+let cachedNowPlaying = null;
+let nowPlayingExpiry = 0;
 
 const getNowPlaying = async () => {
     const { access_token } = await getAccessToken();
-
     return axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
+        headers: { Authorization: `Bearer ${access_token}` },
     });
 };
 
+let cachedRecentlyPlayed = null;
+let recentlyPlayedExpiry = 0;
+
 const getRecentlyPlayed = async () => {
+    if (cachedRecentlyPlayed && Date.now() < recentlyPlayedExpiry) {
+        return cachedRecentlyPlayed;
+    }
     try {
         const { access_token } = await getAccessToken();
-
-        return await axios.get('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-            },
+        const response = await axios.get('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
+            headers: { Authorization: `Bearer ${access_token}` },
         });
+        cachedRecentlyPlayed = response;
+        recentlyPlayedExpiry = Date.now() + 60000; // Cache for 1 minute
+        return response;
     } catch (error) {
-        console.error('Error fetching recently played:', error.response?.data || error.message);
+        console.error('Error fetching recently played:', error.message);
+        if (cachedRecentlyPlayed) return cachedRecentlyPlayed; // Graceful fallback
         throw error;
     }
 };
+
 
 app.use(cors());
 app.use(express.json());
@@ -109,18 +131,60 @@ app.get('/api/spotify/now-playing', async (req, res) => {
             return res.status(200).json({ isPlaying: false, title: "Not Connected", artist: "Setup Spotify API" });
         }
 
-        const response = await getNowPlaying();
+        let response;
+        try {
+            if (cachedNowPlaying && Date.now() < nowPlayingExpiry) {
+                response = cachedNowPlaying;
+            } else {
+                response = await getNowPlaying();
+                cachedNowPlaying = response;
+                nowPlayingExpiry = Date.now() + 10000; // Cache for 10 seconds
+            }
+        } catch (e) {
+            if (e.response && e.response.status === 429) {
+                console.warn("Spotify Rate Limited! Falling back to cache or recently-played.");
+                response = cachedNowPlaying || { status: 204 }; // Force fallback to recently-played
+            } else {
+                throw e;
+            }
+        }
 
-        if (response.status === 204 || response.status > 400) {
-            const recentResponse = await getRecentlyPlayed();
+        if (response.status === 204 || response.status > 400 || !response.data || !response.data.item) {
+            let recentResponse;
+            try {
+                recentResponse = await getRecentlyPlayed();
+            } catch (e) {
+                // Total failure (API down or 429 and no cache)
+                return res.status(200).json({
+                    isPlaying: false,
+                    title: "API Rate Limited",
+                    artist: "Spotify",
+                    albumArt: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjwvc3ZnPg==",
+                    songUrl: "#",
+                    previewUrl: null
+                });
+            }
+            
+            if (!recentResponse.data || !recentResponse.data.items || recentResponse.data.items.length === 0) {
+                return res.status(200).json({
+                    isPlaying: false,
+                    title: "Not Playing",
+                    artist: "Spotify",
+                    albumArt: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjwvc3ZnPg==",
+                    songUrl: "#",
+                    previewUrl: null
+                });
+            }
+
             const track = recentResponse.data.items[0].track;
             
             return res.status(200).json({
                 isPlaying: false,
                 title: track.name,
                 artist: track.artists.map((_artist) => _artist.name).join(', '),
-                albumArt: track.album.images[0].url,
+                albumArt: track.album.images[0]?.url || '',
                 songUrl: track.external_urls.spotify,
+                previewUrl: track.preview_url || null
             });
         }
 
@@ -129,12 +193,20 @@ app.get('/api/spotify/now-playing', async (req, res) => {
             isPlaying: song.is_playing,
             title: song.item.name,
             artist: song.item.artists.map((_artist) => _artist.name).join(', '),
-            albumArt: song.item.album.images[0].url,
-            songUrl: song.item.external_urls.spotify,
+            albumArt: song.item.album?.images[0]?.url || '',
+            songUrl: song.item.external_urls?.spotify || "#",
+            previewUrl: song.item.preview_url || null
         });
     } catch (error) {
         console.error('Spotify API Error:', error.message);
-        res.status(200).json({ isPlaying: false, title: "Offline", artist: "Spotify API" });
+        res.status(200).json({ 
+            isPlaying: false, 
+            title: cachedRecentlyPlayed ? cachedRecentlyPlayed.data.items[0].track.name : "Rate Limited", 
+            artist: cachedRecentlyPlayed ? cachedRecentlyPlayed.data.items[0].track.artists.map(a => a.name).join(', ') : "Try Again Soon", 
+            albumArt: cachedRecentlyPlayed ? cachedRecentlyPlayed.data.items[0].track.album.images[0].url : "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjwvc3ZnPg==",
+            songUrl: cachedRecentlyPlayed ? cachedRecentlyPlayed.data.items[0].track.external_urls.spotify : "#",
+            previewUrl: cachedRecentlyPlayed ? cachedRecentlyPlayed.data.items[0].track.preview_url : null
+        });
     }
 });
 

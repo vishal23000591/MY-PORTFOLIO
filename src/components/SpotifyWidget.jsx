@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Music, Share2, Search, X, Plus, MoreHorizontal, Play, Pause } from 'lucide-react';
 
@@ -33,11 +33,15 @@ const SpotifyWidget = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  const audioRef = useRef(null);
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+
   const [songData, setSongData] = useState({
     title: "Not Playing",
     artist: "Spotify",
     albumArt: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjwvc3ZnPg==",
-    songUrl: "#"
+    songUrl: "#",
+    previewUrl: null
   });
 
   // Function to fetch now playing song data from backend proxy
@@ -90,8 +94,17 @@ const SpotifyWidget = () => {
   };
 
   const togglePlayback = () => {
-    setIsPlaying(!isPlaying);
-    // Note: Actual Spotify playback control requires 'user-modify-playback-state' scope
+    if (songData.previewUrl && audioRef.current) {
+        if (isPlayingPreview) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.play();
+        }
+        setIsPlayingPreview(!isPlayingPreview);
+    } else {
+        // Fallback: Opens the song in Spotify App since no preview audio exists
+        window.open(songData.songUrl, '_blank');
+    }
   };
 
   return (
@@ -100,6 +113,14 @@ const SpotifyWidget = () => {
       whileInView={{ opacity: 1, y: 0 }}
       className="w-full glass-morphism rounded-[32px] p-6 border border-primary/10 relative overflow-hidden group hover:border-accent/30 transition-all duration-500"
     >
+      {songData.previewUrl && (
+        <audio 
+          ref={audioRef} 
+          src={songData.previewUrl} 
+          onEnded={() => setIsPlayingPreview(false)} 
+        />
+      )}
+
       {/* Background Decorative Element */}
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-colors"></div>
 
@@ -108,7 +129,7 @@ const SpotifyWidget = () => {
         {/* Vinyl Record / Album Art */}
         <div className="relative w-32 h-32 flex-shrink-0">
           <motion.div 
-            animate={{ rotate: isPlaying ? 360 : 0 }}
+            animate={{ rotate: isPlaying || isPlayingPreview ? 360 : 0 }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
             className="w-full h-full rounded-full relative p-1 bg-[#121212] shadow-2xl"
           >
@@ -133,7 +154,7 @@ const SpotifyWidget = () => {
           {/* Tone Arm (UI only) */}
           <motion.div 
             initial={{ rotate: -20 }}
-            animate={{ rotate: isPlaying ? 0 : -20 }}
+            animate={{ rotate: isPlaying || isPlayingPreview ? 0 : -20 }}
             className="absolute -top-2 -right-2 w-16 h-1 bg-secondary/20 origin-right rounded-full hidden md:block"
             style={{ transformOrigin: 'right center' }}
           >
@@ -229,7 +250,7 @@ const SpotifyWidget = () => {
                     <motion.div
                       key={i}
                       animate={{ 
-                        height: isPlaying ? [8, 24, 12, 28, 16][i % 5] : 4 
+                        height: isPlaying || isPlayingPreview ? [8, 24, 12, 28, 16][i % 5] : 4 
                       }}
                       transition={{ 
                         duration: 0.6, 
@@ -246,7 +267,7 @@ const SpotifyWidget = () => {
                 {/* Status Indicator */}
                 <div className="px-3 py-1 bg-accent/10 rounded-full border border-accent/20">
                    <span className="text-[10px] font-mono text-accent font-bold uppercase tracking-widest">
-                     {isPlaying ? "Live Audio Active" : "Paused / Recently Played"}
+                     {isPlaying ? "Live Audio Active" : isPlayingPreview ? "Playing Preview" : "Paused / Recently Played"}
                    </span>
                 </div>
               </div>
@@ -261,7 +282,7 @@ const SpotifyWidget = () => {
                   onClick={togglePlayback}
                   className="w-10 h-10 bg-primary text-background rounded-full flex items-center justify-center cursor-pointer hover:bg-accent transition-colors shadow-lg"
                 >
-                  {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} className="ml-0.5" fill="currentColor" />}
+                  {isPlayingPreview ? <Pause size={20} fill="currentColor" /> : <Play size={20} className="ml-0.5" fill="currentColor" />}
                 </motion.div>
               </div>
             </div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GitHubCalendar } from 'react-github-calendar';
 import { Github, Users, Star, GitBranch, Code2 } from 'lucide-react';
-import SpotifyWidget from './SpotifyWidget';
 import LeetCodeWidget from './LeetCodeWidget';
 
 const GithubStats = ({ theme }) => {
@@ -169,14 +168,7 @@ const GithubStats = ({ theme }) => {
             <LeetCodeWidget />
           </div>
 
-          {/* Spotify Activity Widget */}
-          <div className="pt-12 border-t border-primary/10 mt-12 w-full">
-            <div className="flex items-center space-x-3 mb-8">
-              <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
-              <h3 className="text-2xl font-bold text-primary tracking-tight">Listening Activity</h3>
-            </div>
-            <SpotifyWidget />
-          </div>
+
         </div>
       </div>
     </section>
