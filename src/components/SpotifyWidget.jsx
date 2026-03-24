@@ -2,97 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Music, Share2, Search, X, Plus, MoreHorizontal, Play, Pause } from 'lucide-react';
 
-// --- Direct Spotify API Integration ---
-let cachedAccessToken = null;
-let tokenExpiryTime = null;
-
-const getAccessToken = async () => {
-  if (cachedAccessToken && Date.now() < tokenExpiryTime) {
-    return { access_token: cachedAccessToken };
-  }
-  
-  const clientId = 'c8368b7dda2040788787b65238ffcc87';
-  const clientSecret = 'd399d34b244d47959b1330fe98bc00a0';
-  const refreshToken = 'AQCYUbaGE-k-6w3-A1zeVWdaVSV1ZMEtE7o0AV7op-Xjdfgk8MB6L03sehKYs_2bNwR1kG-TFQ5t6-TnaKbYDEue8yOsSMJKfS5h82IvMwLKKodNKHPwJXAgzg4eYWiZ0vc';
-  
-  const basic = btoa(`${clientId}:${clientSecret}`);
-  const params = new URLSearchParams();
-  params.append('grant_type', 'refresh_token');
-  params.append('refresh_token', refreshToken);
-
-  const response = await fetch('https://accounts.spotify.com/api/token', {
-    method: 'POST',
-    headers: { Authorization: `Basic ${basic}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
-  });
-  
-  const data = await response.json();
-  if (data.access_token) {
-    cachedAccessToken = data.access_token;
-    tokenExpiryTime = Date.now() + (data.expires_in - 50) * 1000;
-  }
-  return data;
-};
-
-const getNowPlaying = async () => {
-  const { access_token } = await getAccessToken();
-  if (!access_token) return false;
-
-  const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-    headers: { Authorization: `Bearer ${access_token}` },
-  });
-
-  if (response.status === 204 || response.status > 400) {
-    // If paused, fetch the recently played track instead
-    const recentResponse = await fetch('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
-      headers: { Authorization: `Bearer ${access_token}` },
-    });
-    if (recentResponse.status === 200) {
-      const recentData = await recentResponse.json();
-      if (recentData.items && recentData.items.length > 0) {
-        const track = recentData.items[0].track;
-        return { 
-          isPlaying: false, 
-          title: track.name, 
-          artist: track.artists.map(a => a.name).join(', '), 
-          albumArt: track.album.images[0].url, 
-          songUrl: track.external_urls.spotify 
-        };
-      }
-    }
-    return false;
-  }
-  
-  const song = await response.json();
-  if (!song.item) return false;
-  
-  return { 
-    isPlaying: song.is_playing, 
-    title: song.item.name, 
-    artist: song.item.artists.map(a => a.name).join(', '), 
-    albumArt: song.item.album.images[0].url, 
-    songUrl: song.item.external_urls.spotify 
-  };
-};
-
 const searchSpotifyTracks = async (query) => {
-  const { access_token } = await getAccessToken();
-  if (!access_token || !query) return [];
+  if (!query) return [];
 
-  const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=4`, {
-    headers: { Authorization: `Bearer ${access_token}` },
-  });
-
-  if (response.status !== 200) return [];
-  const data = await response.json();
-  
-  return data.tracks.items.map(track => ({
-    id: track.id,
-    title: track.name,
-    artist: track.artists.map(a => a.name).join(', '),
-    albumArt: track.album.images[0]?.url || '',
-    songUrl: track.external_urls.spotify
-  }));
+  try {
+    const response = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) return [];
+    
+    const data = await response.json();
+    if (!data.tracks || !data.tracks.items) return [];
+    
+    return data.tracks.items.map(track => ({
+      id: track.id,
+      title: track.name,
+      artist: track.artists.map(a => a.name).join(', '),
+      albumArt: track.album.images[0]?.url || '',
+      songUrl: track.external_urls.spotify
+    }));
+  } catch (error) {
+    console.error("Error searching Spotify:", error);
+    return [];
+  }
 };
 
 const SpotifyWidget = () => {
@@ -106,15 +36,16 @@ const SpotifyWidget = () => {
   const [songData, setSongData] = useState({
     title: "Not Playing",
     artist: "Spotify",
-    albumArt: "https://i.scdn.co/image/ab67616d0000b2734718e2b7e4ba05dcfc101307",
+    albumArt: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzIyMiIvPjwvc3ZnPg==",
     songUrl: "#"
   });
 
-  // Function to fetch now playing song data from literal API
+  // Function to fetch now playing song data from backend proxy
   const fetchNowPlaying = async () => {
     try {
-      const data = await getNowPlaying();
-      if (data) {
+      const response = await fetch('/api/spotify/now-playing');
+      if (response.ok) {
+        const data = await response.json();
         setSongData(data);
         setIsPlaying(data.isPlaying);
       }

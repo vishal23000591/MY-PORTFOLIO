@@ -23,10 +23,16 @@ const GithubStats = ({ theme }) => {
     const fetchStats = async () => {
       try {
         const response = await fetch(`https://api.github.com/users/${username}`);
+        if (!response.ok) {
+          console.warn(`GitHub API returned status ${response.status}. Using fallback stats.`);
+          setStats(fallbackStats);
+          return;
+        }
         const data = await response.json();
         setStats(data);
       } catch (error) {
         console.error("Error fetching GitHub stats:", error);
+        setStats(fallbackStats);
       }
     };
 

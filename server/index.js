@@ -2,9 +2,8 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const axios = require('axios');
-require('dotenv').config();
-
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 5001;
 
@@ -49,13 +48,18 @@ const getNowPlaying = async () => {
 };
 
 const getRecentlyPlayed = async () => {
-    const { access_token } = await getAccessToken();
+    try {
+        const { access_token } = await getAccessToken();
 
-    return axios.get('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-        },
-    });
+        return await axios.get('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching recently played:', error.response?.data || error.message);
+        throw error;
+    }
 };
 
 app.use(cors());
@@ -131,6 +135,30 @@ app.get('/api/spotify/now-playing', async (req, res) => {
     } catch (error) {
         console.error('Spotify API Error:', error.message);
         res.status(200).json({ isPlaying: false, title: "Offline", artist: "Spotify API" });
+    }
+});
+
+app.get('/api/spotify/search', async (req, res) => {
+    try {
+        const query = req.query.q;
+        if (!query) return res.status(400).json({ error: 'Query parameter "q" is required' });
+
+        if (!client_id || !client_secret || !refresh_token) {
+            return res.status(200).json({ tracks: { items: [] } });
+        }
+
+        const { access_token } = await getAccessToken();
+
+        const response = await axios.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=4`, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        });
+
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error('Spotify Search Error:', error.message);
+        res.status(500).json({ error: 'Failed to search Spotify tracks' });
     }
 });
 
