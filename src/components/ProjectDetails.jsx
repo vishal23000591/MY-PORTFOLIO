@@ -2,6 +2,9 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Github, ExternalLink, Code2, Layers, Cpu, Zap, ArrowUpRight } from 'lucide-react';
+import revaAiImg from '../assets/reva-ai.png';
+import skyauraImg from '../assets/skyaura.png';
+import credoraImg from '../assets/credora.png';
 
 const ProjectDetails = () => {
   const { projectId } = useParams();
@@ -49,7 +52,8 @@ const ProjectDetails = () => {
         "Blockchain-enabled credential verification",
         "Multilingual document processing"
       ],
-      links: { github: "#", live: "https://reva-ai-k7nm.onrender.com" }
+      links: { github: "#", live: "https://reva-ai-k7nm.onrender.com" },
+      image: revaAiImg
     },
     "reva-ai-authenticator": {
       title: "Reva AI Authenticator",
@@ -64,6 +68,35 @@ const ProjectDetails = () => {
         "Responsive Web Interface"
       ],
       links: { github: "#", live: "https://reva-ai-authenticator-frontend.onrender.com" }
+    },
+    "credora": {
+      title: "CREDORA",
+      subtitle: "Secure Personal Vault Application",
+      category: "Security / Privacy / Productivity",
+      description: "A privacy-focused personal vault application designed to securely store passwords, sensitive files, and personal data in one unified platform.",
+      longDescription: "CREDORA emphasizes strong encryption, clean user experience, and a modular architecture. It unifies credential management, secure file storage, and personal productivity tools like Kanban boards into a single, highly-protected ecosystem.",
+      tech: ["React.js", "Tailwind CSS", "Node.js", "Express.js", "AES-256 Encryption", "Bcrypt", "JWT"],
+      features: [
+        "Encrypted Password Manager — Secure storage for all your credentials",
+        "Renewal Reminder System — Automated alerts for subscriptions and licenses",
+        "Secure File Vault — Encrypted storage with safe localized retrieval",
+        "Kanban Task Board — Integrated personal productivity management",
+        "Secure Auth — JWT-based session handling and secure password hashing"
+      ],
+      innovations: [
+        "Hybrid Encryption — Combining AES and RSA for maximum data security",
+        "Zero-Knowledge Architecture — Data is encrypted before leaving the client",
+        "Modular Vault System — Easily extendable for new data types",
+        "Intuitive Security Dashboard — Real-time health scoring of your credentials"
+      ],
+      roadmap: [
+        "Multi-Factor Authentication (2FA)",
+        "Mobile App Sync (iOS/Android)",
+        "Biometric Unlock Integration",
+        "Advanced Analytics & Security Auditing"
+      ],
+      links: { github: "#", live: "#" },
+      image: credoraImg
     },
     "ecommerce-product-quality-detection": {
       title: "E-commerce Product Quality Detection",
@@ -105,7 +138,8 @@ const ProjectDetails = () => {
         "Real-time flight status tracking",
         "Premium membership portal"
       ],
-      links: { github: "#", live: "https://skyaura-airways-e0iy.onrender.com" }
+      links: { github: "#", live: "https://skyaura-airways-e0iy.onrender.com" },
+      image: skyauraImg
     },
     "anemia-ai-detection-system": {
       title: "Anemia AI Detection System",
@@ -195,6 +229,23 @@ const ProjectDetails = () => {
               </motion.a>
             </div>
           </div>
+
+          {/* Project Image */}
+          {project.image && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="relative w-full aspect-video rounded-3xl overflow-hidden border border-primary/10 group shadow-2xl"
+            >
+              <img 
+                src={project.image} 
+                alt={project.title} 
+                className="w-full h-full object-cover object-top"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+            </motion.div>
+          )}
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-16 pt-8 border-t border-primary/5">

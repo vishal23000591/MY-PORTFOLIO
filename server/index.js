@@ -7,6 +7,78 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// API Headers & Middleware
+app.use(cors());
+app.use(express.json());
+
+// API Health Test
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// LeetCode Proxy Route (using official GraphQL)
+app.get('/api/leetcode/:username', async (req, res) => {
+    try {
+        const { username } = req.params;
+        console.log(`[Proxy] Fetching LeetCode stats via GraphQL for: ${username}`);
+        
+        const query = `
+            query getUserProfile($username: String!) { 
+                allQuestionsCount { difficulty count } 
+                matchedUser(username: $username) { 
+                    profile { ranking }
+                    submitStats { 
+                        acSubmissionNum { difficulty count } 
+                        totalSubmissionNum { difficulty count } 
+                    } 
+                } 
+            }
+        `;
+
+        const response = await axios.post('https://leetcode.com/graphql', {
+            query,
+            variables: { username }
+        }, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = response.data.data;
+        if (!data.matchedUser) {
+            return res.status(404).json({ status: 'error', message: 'User not found' });
+        }
+
+        const allQs = data.allQuestionsCount;
+        const acNums = data.matchedUser.submitStats.acSubmissionNum;
+        const totalNums = data.matchedUser.submitStats.totalSubmissionNum;
+        
+        const getCount = (arr, diff) => arr.find(item => item.difficulty === diff)?.count || 0;
+
+        const totalAc = getCount(acNums, "All");
+        const totalSub = getCount(totalNums, "All");
+        const acceptanceRate = totalSub === 0 ? 0 : parseFloat(((totalAc / totalSub) * 100).toFixed(2));
+
+        const formattedStats = {
+            status: "success",
+            totalSolved: totalAc,
+            totalQuestions: getCount(allQs, "All"),
+            easySolved: getCount(acNums, "Easy"),
+            totalEasy: getCount(allQs, "Easy"),
+            mediumSolved: getCount(acNums, "Medium"),
+            totalMedium: getCount(allQs, "Medium"),
+            hardSolved: getCount(acNums, "Hard"),
+            totalHard: getCount(allQs, "Hard"),
+            acceptanceRate: acceptanceRate,
+            ranking: data.matchedUser.profile.ranking
+        };
+
+        console.log(`[Proxy] Success formatted GraphQL data`);
+        res.status(200).json(formattedStats);
+    } catch (error) {
+        console.error('LeetCode Proxy Error:', error.message);
+        res.status(500).json({ error: 'Failed to fetch LeetCode stats' });
+    }
+});
+
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../dist')));
 
@@ -84,8 +156,6 @@ const getRecentlyPlayed = async () => {
 };
 
 
-app.use(cors());
-app.use(express.json());
 
 // Main site email route
 app.post('/api/send-email', async (req, res) => {

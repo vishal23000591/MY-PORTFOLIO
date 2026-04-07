@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { ExternalLink, Github, Monitor, Zap, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import skyauraImg from '../assets/skyaura.png';
+import revaAiImg from '../assets/reva-ai.png';
+import credoraImg from '../assets/credora.png';
 
 const Projects = () => {
 
@@ -17,7 +19,8 @@ const Projects = () => {
         github: "#"
       },
       icon: <Monitor className="text-accent" />,
-      id: "reva-ai"
+      id: "reva-ai",
+      image: revaAiImg
     },
     {
       title: "Reva AI Authenticator",
@@ -29,6 +32,18 @@ const Projects = () => {
       },
       icon: <Monitor className="text-accent" />,
       id: "reva-ai-authenticator"
+    },
+    {
+      title: "CREDORA",
+      description: "Privacy-focused personal vault for passwords, sensitive files, and task management with AES encryption.",
+      tech: ["React", "Node.js", "AES Encryption", "Express", "Tailwind"],
+      links: {
+        live: "#",
+        github: "#"
+      },
+      icon: <Zap className="text-accent" />,
+      id: "credora",
+      image: credoraImg
     },
     {
       title: "E-commerce Product Quality Detection",
@@ -61,7 +76,8 @@ const Projects = () => {
         github: "#"
       },
       icon: <Monitor className="text-accent" />,
-      id: "skyaura-airways"
+      id: "skyaura-airways",
+      image: skyauraImg
     },
     {
       title: "Anemia AI Detection System",
@@ -106,9 +122,9 @@ const Projects = () => {
                 <div className="w-full md:w-3/5 aspect-video relative group overflow-hidden rounded-3xl border border-primary/10">
                   <div className={`absolute inset-0 ${project.id === 'skyaura-airways' ? 'hidden' : 'bg-accent/10 group-hover:bg-transparent'} transition-colors duration-700 z-10`}></div>
                   
-                  {/* Background Image / Visual */}
+                   {/* Background Image / Visual */}
                   <div className="w-full h-full bg-surface relative flex items-center justify-center transform group-hover:scale-110 transition-transform duration-1000">
-                    {project.id === 'skyaura-airways' ? (
+                    {project.image ? (
                       <a 
                         href={project.links.live} 
                         target="_blank" 
@@ -116,9 +132,9 @@ const Projects = () => {
                         className="absolute inset-0 z-30 block w-full h-full"
                       >
                         <img 
-                          src={skyauraImg} 
+                          src={project.image} 
                           alt={project.title}
-                          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+                          className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-700"
                         />
                       </a>
                     ) : (
