@@ -12,7 +12,7 @@ const TimelineItem = ({ data, index }) => {
 
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.6, 1]);
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 0.9, 1]);
-  
+
   // Dynamic styles that work with both themes
   const iconGlow = useTransform(scrollYProgress, [0, 1], ["0px 0px 0px rgba(0,0,0,0)", "0px 0px 20px var(--accent-glow)"]);
   const iconBg = useTransform(scrollYProgress, [0, 1], ["var(--surface)", "var(--accent)"]);
@@ -20,15 +20,15 @@ const TimelineItem = ({ data, index }) => {
   return (
     <div ref={itemRef} className={`mb-32 flex justify-between items-center w-full ${isEven ? 'flex-row-reverse' : ''}`}>
       <div className="hidden md:block w-5/12"></div>
-      
-      <motion.div 
+
+      <motion.div
         style={{ backgroundColor: iconBg, boxShadow: iconGlow }}
         className="z-20 flex items-center justify-center w-12 h-12 rounded-full border-4 border-background transition-shadow duration-500"
       >
-         {data.icon}
+        {data.icon}
       </motion.div>
 
-      <motion.div 
+      <motion.div
         style={{ opacity, scale }}
         className="w-full md:w-5/12 glass-morphism p-8 rounded-3xl border border-[var(--border)] hover:border-[var(--accent)] transition-all relative group shadow-2xl shadow-accent/5 backdrop-blur-xl"
       >
@@ -73,10 +73,26 @@ const Timeline = () => {
 
   const timelineData = [
     {
+      year: "2025 - Present",
+      title: "Freelance Developer",
+      subtitle: "Levizen",
+      details: "Currently freelancing for Levizen, notably executing the 'Credora' project featured in my portfolio.",
+      type: "Experience",
+      icon: <Briefcase size={18} className="text-[var(--bg)]" />
+    },
+    {
+      year: "2026 - Present",
+      title: "Remote Intern",
+      subtitle: "Geo Pacific Solutions Private Limited",
+      details: "Working remotely to build and deploy a dedicated project tailored to their operational needs.",
+      type: "Experience",
+      icon: <Briefcase size={18} className="text-[var(--bg)]" />
+    },
+    {
       year: "2023 - 2027",
       title: "B.E. Computer Science and Engineering (IoT)",
       subtitle: "Saveetha Engineering College, Chennai",
-      details: "Focusing on AI, ML, and Full Stack development with a CGPA of 8.32/10. Exploring the intersection of IoT and intelligent systems.",
+      details: "Focusing on AI, ML, and Full Stack development with a CGPA of 8.37/10. Exploring the intersection of IoT and intelligent systems.",
       type: "Education",
       icon: <GraduationCap size={18} className="text-[var(--bg)]" />
     },
@@ -126,7 +142,7 @@ const Timeline = () => {
     <section id="timeline" className="py-32 relative bg-[var(--bg)] transition-colors duration-700 overflow-hidden" ref={containerRef}>
       <div className="container mx-auto px-6">
         <div className="mb-32 text-center space-y-6">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -134,7 +150,7 @@ const Timeline = () => {
           >
             My <span className="text-[var(--accent)] underline underline-offset-[12px]">Journey</span>
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -148,9 +164,9 @@ const Timeline = () => {
         <div className="relative max-w-7xl mx-auto">
           {/* Vertical Line Background */}
           <div className="absolute left-1/2 transform -translate-x-1/2 w-[2px] h-full bg-[var(--text-primary)] opacity-5 hidden md:block"></div>
-          
+
           {/* Animated Progress Line */}
-          <motion.div 
+          <motion.div
             style={{ scaleY }}
             className="absolute left-1/2 transform -translate-x-1/2 w-[2px] h-full bg-gradient-to-b from-[var(--accent)]/50 to-[var(--accent)] origin-top hidden md:block"
           >

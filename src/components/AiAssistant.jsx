@@ -31,24 +31,24 @@ const AiAssistant = () => {
     ml: "Vishal has extensive experience with ML and Deep Learning, using tools like TensorFlow (for Anemia detection), PyTorch (for YOLO-based quality detection), and Scikit-learn.",
     yolo: "Vishal integrated YOLO (You Only Look Once) in his E-commerce Product Quality project for real-time object detection and freshness assessment.",
     projects: "Vishal has several featured projects: Reva AI, E-commerce Product Quality Detection, Healthcare ML System, SkyAura Airways, and Anemia AI Detection. Which one should I detail further?",
-    
+
     // Detailed Projects
     reva: "Reva AI is a Federated AI Framework for recruitment and document authentication. It unifies NLP and Computer Vision for high-accuracy talent assessment. Check it out at: /project/reva-ai",
     revaStack: "The tech stack for Reva AI includes: React, Python (Flask), NLP libraries, and Tailwind CSS for the interface.",
-    
+
     ecommerce: "The E-commerce Quality Detection project uses YOLO and OCR to detect product expiry, freshness, and quantity automatically. Built for smart retail. Explore more: /project/ecommerce-product-quality-detection",
     ecommerceStack: "The tech stack for E-commerce Quality Detection includes: YOLO (Object Detection), PyTorch, Tesseract OCR, Python, and FastAPI.",
-    
+
     healthcare: "The Healthcare ML System is a neural network-based platform that predicts patient outcomes and assists in clinical decisions. Learn more: /project/healthcare-ml-system",
     healthcareStack: "The tech stack for the Healthcare ML System includes: Python, TensorFlow/Keras, Pandas (Data processing), and NumPy.",
-    
+
     skyaura: "SkyAura Airways is a flight booking system with real-time seat selection and admin analytics. Live link: https://skyaura-airways-e0iy.onrender.com | Explore: /project/skyaura-airways",
     skyauraStack: "The tech stack for SkyAura Airways includes: React (Frontend), Node.js/Express (Backend), and MongoDB (Database).",
-    
+
     anemia: "The Anemia AI Detection System uses clinical parameters and deep learning to predict hemoglobin levels and health risks. Details: /project/anemia-ai-detection-system",
     anemiaStack: "The tech stack for Anemia AI Detection includes: TensorFlow (ML), FastAPI (API), Python, and Scikit-learn.",
-    
-    education: "Vishal is currently pursuing a B.E. in Computer Science and Engineering (IoT) at Saveetha Engineering College (3rd Year). His CGPA is 8.32/10.",
+
+    education: "Vishal is currently pursuing a B.E. in Computer Science and Engineering (IoT) at Saveetha Engineering College (3rd Year). His CGPA is 8.37/10.",
     achievements: "Some of Vishal's key achievements include being a Semi Finalist in Flipkart GRID 6.0 Robotics and a Finalist in Nasscom Automation (Agentic AI).",
     contact: "You can reach Vishal via email or through the social links in the Contact section at the bottom of the page!",
     internship: "Vishal has interned at the NSIC Technical Training Centre and is always looking for new opportunities in AI, ML, or technical roles.",
@@ -79,14 +79,14 @@ const AiAssistant = () => {
       else if (lowerInput.includes("node")) reply = responses.node;
       else if (lowerInput.includes("yolo") || lowerInput.includes("ocr") || lowerInput.includes("computer vision")) reply = responses.yolo;
       else if (lowerInput.includes("machine learning") || lowerInput.includes(" ml") || lowerInput.includes("deep learning") || lowerInput.includes("ai ")) reply = responses.ml;
-      
+
       // Project Stack Logic
       else if ((lowerInput.includes("stack") || lowerInput.includes("use") || lowerInput.includes("build") || lowerInput.includes("technology")) && lowerInput.includes("reva")) reply = responses.revaStack;
       else if ((lowerInput.includes("stack") || lowerInput.includes("use") || lowerInput.includes("build") || lowerInput.includes("technology")) && lowerInput.includes("ecommerce")) reply = responses.ecommerceStack;
       else if ((lowerInput.includes("stack") || lowerInput.includes("use") || lowerInput.includes("build") || lowerInput.includes("technology")) && lowerInput.includes("healthcare")) reply = responses.healthcareStack;
       else if ((lowerInput.includes("stack") || lowerInput.includes("use") || lowerInput.includes("build") || lowerInput.includes("technology")) && lowerInput.includes("skyaura")) reply = responses.skyauraStack;
       else if ((lowerInput.includes("stack") || lowerInput.includes("use") || lowerInput.includes("build") || lowerInput.includes("technology")) && lowerInput.includes("anemia")) reply = responses.anemiaStack;
-      
+
       // Project Basic Logic
       else if (lowerInput.includes("skyaura") || lowerInput.includes("flight") || lowerInput.includes("booking")) reply = responses.skyaura;
       else if (lowerInput.includes("reva")) reply = responses.reva;
@@ -94,7 +94,7 @@ const AiAssistant = () => {
       else if (lowerInput.includes("healthcare") || lowerInput.includes("patient") || lowerInput.includes("clinical")) reply = responses.healthcare;
       else if (lowerInput.includes("anemia") || lowerInput.includes("hemoglobin")) reply = responses.anemia;
       else if (lowerInput.includes("project") || lowerInput.includes("work")) reply = responses.projects;
-      
+
       else if (lowerInput.includes("education") || lowerInput.includes("study") || lowerInput.includes("college") || lowerInput.includes("school") || lowerInput.includes("cgpa")) reply = responses.education;
       else if (lowerInput.includes("achievement") || lowerInput.includes("win") || lowerInput.includes("award") || lowerInput.includes("grid") || lowerInput.includes("nasscom")) reply = responses.achievements;
       else if (lowerInput.includes("contact") || lowerInput.includes("email") || lowerInput.includes("reach") || lowerInput.includes("message")) reply = responses.contact;
@@ -126,7 +126,7 @@ const AiAssistant = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Pulsing Aura */}
         <div className="absolute inset-0 rounded-full border-2 border-[var(--accent)] animate-ping opacity-20 pointer-events-none"></div>
       </motion.button>
@@ -148,14 +148,14 @@ const AiAssistant = () => {
               <div>
                 <h3 className="font-bold text-[var(--text-primary)] leading-none italic uppercase tracking-widest text-sm">Reva Assistant</h3>
                 <p className="text-[var(--text-secondary)] text-[10px] uppercase tracking-widest mt-1 mt-1 block h-3 overflow-hidden">
-                   <motion.span animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }}>Online & Active</motion.span>
+                  <motion.span animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }}>Online & Active</motion.span>
                 </p>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div 
-              data-lenis-prevent 
+            <div
+              data-lenis-prevent
               className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar"
             >
               {messages.map((msg) => (
@@ -165,16 +165,15 @@ const AiAssistant = () => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}
                 >
-                  <div className={`max-w-[85%] p-4 rounded-2xl text-sm ${
-                    msg.isBot 
-                      ? 'bg-[var(--surface)] text-[var(--text-primary)] border border-[var(--border)] rounded-tl-none' 
+                  <div className={`max-w-[85%] p-4 rounded-2xl text-sm ${msg.isBot
+                      ? 'bg-[var(--surface)] text-[var(--text-primary)] border border-[var(--border)] rounded-tl-none'
                       : 'bg-[var(--accent)] text-[var(--bg)] font-bold rounded-tr-none shadow-lg shadow-accent/10'
-                  }`}>
+                    }`}>
                     {msg.text}
                   </div>
                 </motion.div>
               ))}
-              
+
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-[var(--surface)] p-4 rounded-2xl rounded-tl-none border border-[var(--border)]">
